@@ -48,7 +48,7 @@ base base-devel \
 linux linux-firmware \
 grub \
 netctl wpa_supplicant dhcpcd dialog \
-gvim gnu-netcat
+gvim gnu-netcat man-db
 ```
 
 Generate fstab and change root into new system.
