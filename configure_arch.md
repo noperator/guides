@@ -85,3 +85,11 @@ EOF
 # Add <USER> to video group.
 sudo usermod -a -G video <USER>
 ```
+
+<!--
+Enable fingerprint reader (requires `extra/gobject-introspection` and `libfprint-vfs0090-git`).
+```
+for /etc/pam.d/system-local-login and /etc/pam.d/sudo:  # Use fingerprint first.
+    auth      sufficient pam_fprintd.so  # at top
+```
+-->
