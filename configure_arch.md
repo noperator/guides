@@ -12,8 +12,10 @@ i3 xorg-xinit xorg-server xf86-video-intel rxvt-unicode dmenu feh \
 git \
 qutebrowser \
 lastpass-cli \
-acpi acpilight
-ttf-roboto gnu-free-fonts ttf-font-awesome
+acpi acpilight \
+alsa-utils \
+ttf-roboto gnu-free-fonts ttf-font-awesome \
+jq
 ```
 
 Install AUR search agent.
@@ -57,4 +59,17 @@ Install dotfiles.
 git clone https://github.com/noperator/dotfiles.git
 cd dotfiles
 ./link.sh
+```
+
+Allow user to set display brightness (following [this post](https://forum.manjaro.org/t/xbacklight-does-not-have-permission/74061/5)).
+```
+# Create udev rule to allow users in the video group to set the display brightness.
+sudo tee /etc/udev/rules.d/90-backlight.rules > /dev/null << EOF
+SUBSYSTEM==“backlight”, ACTION==“add”,
+RUN+="/bin/chgrp video /sys/class/backlight/%k/brightness",
+RUN+="/bin/chmod g+w /sys/class/backlight/%k/brightness"
+EOF
+
+# Add <USER> to video group.
+sudo usermod -a -G video <USER>
 ```
