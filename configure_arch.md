@@ -1,4 +1,11 @@
+**Note**: This guide only includes configuration details that are either:
+1. required to be performed manually, or
+2. _not_ covered by my [dotfiles repo](https://github.com/noperator/dotfiles).
+
+
+
 Add a user.
+
 ```
 useradd -m <USER>
 passwd <USER>
