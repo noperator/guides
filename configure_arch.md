@@ -20,7 +20,7 @@ jq
 
 Install AUR search agent.
 ```
-git clone https://aur.archlinux.org/auracle-git.git
+git clone https://aur.archlinux.org/auracle-git.git && cd auracle-git
 makepkg -si
 ```
 
@@ -56,8 +56,7 @@ done
 
 Install dotfiles.
 ```
-git clone https://github.com/noperator/dotfiles.git
-cd dotfiles
+git clone https://github.com/noperator/dotfiles.git && cd dotfiles
 ./link.sh
 ```
 
@@ -77,7 +76,7 @@ Allow user to set display brightness (following [this post](https://forum.manjar
 ```
 # Create udev rule to allow users in the video group to set the display brightness.
 sudo tee /etc/udev/rules.d/90-backlight.rules > /dev/null << EOF
-SUBSYSTEM==“backlight”, ACTION==“add”,
+SUBSYSTEM=="backlight", ACTION=="add",
 RUN+="/bin/chgrp video /sys/class/backlight/%k/brightness",
 RUN+="/bin/chmod g+w /sys/class/backlight/%k/brightness"
 EOF
