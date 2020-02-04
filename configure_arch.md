@@ -13,6 +13,7 @@ git \
 qutebrowser \
 lastpass-cli \
 acpi acpilight
+ttf-roboto gnu-free-fonts ttf-font-awesome
 ```
 
 Install AUR search agent.
@@ -28,6 +29,19 @@ gpg --recv-key --keyserver hkp://pgp.mit.edu <KEY>
 
 dropbox
 dropbox-cli
+ttf-symbola
+libfprint-vfs0090-git
+```
+
+Verify fonts.
+```
+for TYPEFACE in Sans Serif Monospace; do
+    echo "$TYPEFACE: $(fc-match $TYPEFACE)"
+done | column -t -s :
+
+Sans        Roboto-Regular.ttf          "Roboto" "Regular"
+Serif       FreeSerif.otf               "FreeSerif" "Regular"
+Monospace   SourceCodePro-Regular.otf   "Source Code Pro" "Regular"
 ```
 
 Disable `pinentry` UI.
