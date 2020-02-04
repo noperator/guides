@@ -61,6 +61,18 @@ cd dotfiles
 ./link.sh
 ```
 
+Enable natural scrolling.
+```
+sudo tee /etc/X11/xorg.conf.d/30-touchpad.conf > /dev/null << EOF
+Section "InputClass"
+    Identifier "devname"
+    Driver "libinput"
+    MatchIsTouchpad "on"
+    Option "NaturalScrolling" "true"
+EndSection
+EOF
+```
+
 Allow user to set display brightness (following [this post](https://forum.manjaro.org/t/xbacklight-does-not-have-permission/74061/5)).
 ```
 # Create udev rule to allow users in the video group to set the display brightness.
