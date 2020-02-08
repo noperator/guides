@@ -84,3 +84,5 @@ Now that changes are fetched from `origin`, there are a few possible scenarios. 
   
   nothing to commit, working tree clean
   ```
+
+  In this case, you can simply `git reset HEAD^` to undo the last commit (i.e., peel it off) and restore the index to the state it was in before that commit, leaving the working directory with the changes uncommitted. Now, merge changes from `origin` and commit again.
