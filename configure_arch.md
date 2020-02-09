@@ -92,6 +92,12 @@ EOF
 sudo usermod -a -G video <USER>
 ```
 
+Disable irritating beep.
+```
+sudo modprobe -r pcspkr
+echo 'blacklist pcspkr' | sudo tee /etc/modprobe.d/nobeep.conf
+```
+
 <!--
 Enable fingerprint reader (requires `extra/gobject-introspection` and `libfprint-vfs0090-git`).
 ```
