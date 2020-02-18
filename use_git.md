@@ -2,6 +2,18 @@
 - [Git: Fetch and Merge, Don’t Pull](https://longair.net/blog/2009/04/16/git-fetch-and-merge/)
 - [Difference between git reset soft, mixed and hard](https://davidzych.com/difference-between-git-reset-soft-mixed-and-hard/)
 
+## Frequently used commands (FUCs)
+Roll back a single commit. Previously committed changes are now in the working directory, but not staged. Useful when you try to push, but the updates were rejected because the remote repo contains work that you do not have locally.
+
+```
+$ git reset HEAD^
+```
+
+Clone a specific branch.
+```
+$ git clone --single-branch --branch <BRANCH> <REMOTE_REPO>
+```
+
 ## Avoiding painful merge conflicts during pulls
 
 Sometimes, pulling changes from a remote repository into the current branch can lead to a merge conflict:
@@ -39,16 +51,16 @@ From https://github.com/noperator/dotfiles
 ```
 
 Now that changes are fetched from `origin`, there are a few possible scenarios. Assume the local `master` branch is behind `origin/master`, and:
-- There are no local changes.
-  ```
+- There are no local changes. You can safely `git merge origin/master`.
+```
   $ git status
   On branch master
   Your branch is behind 'origin/master' by 1 commit, and can be fast-forwarded.
     (use "git pull" to update your local branch)
-  
+
   nothing to commit, working tree clean
-  ```
-- There are uncommitted local changes.
+```
+- There are uncommitted local changes. You can safely `git merge origin/master`.
   ```
   $ git status
   On branch master
@@ -57,32 +69,31 @@ Now that changes are fetched from `origin`, there are a few possible scenarios. 
   Changes not staged for commit:
     (use "git add <file>..." to update what will be committed)
     (use "git checkout -- <file>..." to discard changes in working directory)
-  
+
           modified:   .bashrc.d/32-git.sh
-  
+
   no changes added to commit (use "git add" and/or "git commit -a")
   ```
-- There are staged local changes (i.e., added but not committed).
+- There are staged local changes (i.e., added but not committed). You can safely `git merge origin/master`.
   ```
   $ git status
   On branch master
   Your branch is behind 'origin/master' by 1 commit, and can be fast-forwarded.
     (use "git pull" to update your local branch)
-  
+
   Changes to be committed:
     (use "git reset HEAD <file>..." to unstage)
-  
+
           modified:   .bashrc.d/32-git.sh
   ```
-- There are committed local changes.
+- There are committed local changes. In this case, you can simply `git reset HEAD^` to undo the last commit (i.e., peel it off) and restore the index to the state it was in before that commit, leaving the working directory with the changes uncommitted. Now, merge changes from `origin` and commit again.
   ```
   $ git status
   On branch master
   Your branch and 'origin/master' have diverged,
   and have 1 and 1 different commits each, respectively.
     (use "git pull" to merge the remote branch into yours)
-  
+
   nothing to commit, working tree clean
   ```
 
-  In this case, you can simply `git reset HEAD^` to undo the last commit (i.e., peel it off) and restore the index to the state it was in before that commit, leaving the working directory with the changes uncommitted. Now, merge changes from `origin` and commit again.
