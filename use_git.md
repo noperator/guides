@@ -50,17 +50,17 @@ From https://github.com/noperator/dotfiles
    bbb89d4..67b04a6  master     -> origin/master
 ```
 
-Now that changes are fetched from `origin`, there are a few possible scenarios. Assume the local `master` branch is behind `origin/master`, and:
-- There are no local changes. You can safely `git merge origin/master`.
-```
-  $ git status
-  On branch master
-  Your branch is behind 'origin/master' by 1 commit, and can be fast-forwarded.
-    (use "git pull" to update your local branch)
-
-  nothing to commit, working tree clean
-```
-- There are uncommitted local changes. You can safely `git merge origin/master`.
+Now that changes are fetched from `origin`, there are a few possible scenarios. Spoiler alert: you can safely merge _unless_ you've made a commit; I spelled all of the possible scenarios out here for my own understanding. Assume the local `master` branch is behind `origin/master`, and:
+- There are **no local changes**. You can safely `git merge origin/master`.
+  ```
+    $ git status
+    On branch master
+    Your branch is behind 'origin/master' by 1 commit, and can be fast-forwarded.
+      (use "git pull" to update your local branch)
+  
+    nothing to commit, working tree clean
+  ```
+- There are **uncommitted local changes**. You can safely `git merge origin/master`.
   ```
   $ git status
   On branch master
@@ -74,7 +74,7 @@ Now that changes are fetched from `origin`, there are a few possible scenarios. 
 
   no changes added to commit (use "git add" and/or "git commit -a")
   ```
-- There are staged local changes (i.e., added but not committed). You can safely `git merge origin/master`.
+- There are **staged local changes** (i.e., added but not committed). You can safely `git merge origin/master`.
   ```
   $ git status
   On branch master
@@ -86,7 +86,7 @@ Now that changes are fetched from `origin`, there are a few possible scenarios. 
 
           modified:   .bashrc.d/32-git.sh
   ```
-- There are committed local changes. In this case, you can simply `git reset HEAD^` to undo the last commit (i.e., peel it off) and restore the index to the state it was in before that commit, leaving the working directory with the changes uncommitted. Now, merge changes from `origin` and commit again.
+- There are **committed local changes**. In this case, you can simply `git reset HEAD^` to undo the last commit (i.e., peel it off) and restore the index to the state it was in before that commit, leaving the working directory with the changes uncommitted. Now, merge changes from `origin` and commit again.
   ```
   $ git status
   On branch master
