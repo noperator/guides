@@ -34,7 +34,7 @@ Generate SSH key, transfer, and confirm.
 ```
 ssh-keygen -t rsa -b 4096 -o -a 100 -q -N '' -f ~/.ssh/pi
 ssh-copy-id -i ~/.ssh/pi pi@raspberrypi
-ssh -i ~/.ssh/pi pi@raspberrypi 'uname -a'ssh -i ~/.ssh/pi pi@raspberrypi 'uname -a'
+ssh -i ~/.ssh/pi pi@raspberrypi 'uname -a'
 ```
 
 Set password.
