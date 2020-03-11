@@ -9,10 +9,3 @@ Display programmable configuration.
 ```
 uci show <CONFIG>
 ```
-
-Misc config tasks:
-- LAN SSH
-  - Disable PasswordAuth/RootPasswordAuth
-- DDNS
-- Hostname
-- VLANs
