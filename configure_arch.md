@@ -98,6 +98,15 @@ sudo modprobe -r pcspkr
 echo 'blacklist pcspkr' | sudo tee /etc/modprobe.d/nobeep.conf
 ```
 
+Add Ethernet `netctl` profile.
+```
+sudo tee /etc/netctl/<IFACE> /dev/null << EOF
+Interface=<IFACE>
+Connection=ethernet
+IP=dhcp
+EOF
+```
+
 <!--
 Enable fingerprint reader (requires `extra/gobject-introspection` and `libfprint-vfs0090-git`).
 ```
