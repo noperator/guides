@@ -51,7 +51,7 @@ sudo apt upgrade -y
 Install display server, browser, and other essentials.
 ```
 sudo apt install -y \
-xserver-xorg-core x11-xserver-utils xinit xdotool \
+xserver-xorg-core x11-xserver-utils xinit \
 chromium-browser \
 git vim jq
 ```
