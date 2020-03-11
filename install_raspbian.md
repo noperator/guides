@@ -56,9 +56,16 @@ chromium-browser \
 git vim jq
 ```
 
-Get dotfiles.
+Install dotfiles.
 ```
-git clone https://github.com/noperator/dotfiles
+git clone https://github.com/noperator/dotfiles.git && cd dotfiles
+./link.sh
+```
+
+Set country code [non-interactively](https://raspberrypi.stackexchange.com/a/66939) to remove login banner, "Wi-Fi is currently blocked by `rfkill`. Use `raspi-config` to set the country before use." While we're here, set the time zone, too.
+```
+sudo raspi-config nonint do_wifi_country US
+sudo raspi-config nonint do_change_timezone US/Eastern
 ```
 
 Fix `startx` error, "Only console users are allowed to run the X server."
