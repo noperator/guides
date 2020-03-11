@@ -1,4 +1,14 @@
-From macOS, write Raspbian to SD card.
+Note: When using macOS to interact with devices, use `/dev/rdiskX` (note the `r`) when possible (i.e., if it doesn't cause an `Input/output error`) as it [tends to be much faster](https://superuser.com/a/631601); `rdisk` is a "raw" character device (closer to the physical disk) while `disk` is a buffered block device.
+
+If needed, mount the filesystem on macOS (read-only) and back up files before wiping the SD card.
+```
+brew cask install osxfuse
+brew install ext4fuse
+sudo mkdir /Volumes/rpi
+sudo ext4fuse /dev/diskXsX /Volumes/rpi -o allow_other
+```
+
+Froe macOS, write Raspbian Lite to SD card. Took 5:45 for a 1.72 GB image (5.10 MB/s) when using `rdisk`.
 ```
 pv 2019-09-26-raspbian-buster-lite.img | sudo dd bs=1m of=/dev/diskX
 ```
