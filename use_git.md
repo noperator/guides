@@ -14,6 +14,12 @@ Clone a specific branch.
 $ git clone --single-branch --branch <BRANCH> <REMOTE_REPO>
 ```
 
+Stop tracking changes to a [*committed* file](https://stackoverflow.com/a/3320183) (and undo it).
+```
+$ git update-index --assume-unchanged <FILE>
+$ git update-index --no-assume-unchanged <FILE>
+```
+
 ## Avoiding painful merge conflicts during pulls
 
 Sometimes, pulling changes from a remote repository into the current branch can lead to a merge conflict:
