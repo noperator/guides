@@ -31,6 +31,14 @@ uci commit
 /etc/init.d/dnsmasq restart  # Optionally, flush DNS cache.
 ```
 
+Set local domain. [RFC 8375](https://tools.ietf.org/html/rfc8375) specifies `.home.arpa` for home-scoped networks. Good discussion [here](https://unix.stackexchange.com/a/92517).
+```
+uci set dhcp.@dnsmasq[0].local='/<LOCAL_DOMAIN>/'
+uci set dhcp.@dnsmasq[0].domain='<LOCAL_DOMAIN>'
+uci commit
+/etc/init.d/dnsmasq reload
+```
+
 TODO:
 - DDNS
 - VLAN
