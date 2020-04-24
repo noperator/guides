@@ -23,7 +23,14 @@ uci commit
 /etc/init.d/network reload
 ```
 
+Set hostname.
+```
+uci set system.@system[0].hostname='<HOSTNAME>'
+uci commit
+/etc/init.d/system reload
+/etc/init.d/dnsmasq restart  # Optionally, flush DNS cache.
+```
+
 TODO:
 - DDNS
-- Hostname
 - VLAN
