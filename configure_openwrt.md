@@ -39,6 +39,13 @@ uci commit
 /etc/init.d/dnsmasq reload
 ```
 
+_Attempt_ to make dnsmasq (handles DHCPv4 and DNS) IPv6-aware by interfacing it with odhcpd (handles DHCPv6). Only seems to work for Ethernet-connected devices, strangely. Potentially useful guides [here](https://superuser.com/a/1248857) and [here](https://openwrt.org/docs/guide-user/network/ipv6/ipv6.dns).
+```
+uci add_list dhcp.@dnsmasq[0].addnhost=$(uci get dhcp.odhcpd.leasefile)  # /tmp/hosts/odhcpd
+uci commit
+/etc/init.d/dnsmasq reload
+```
+
 TODO:
 - DDNS
 - VLAN
