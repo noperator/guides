@@ -46,6 +46,23 @@ uci commit
 /etc/init.d/dnsmasq reload
 ```
 
+Install Simple Adblock using [this guide](https://github.com/openwrt/packages/blob/master/net/simple-adblock/files/README.md).
+```
+# Install with dependencies. These took a _long_ time to download.
+opkg update
+opkg install \
+    ca-certificates wget libopenssl \
+    curl \
+    ip6tables-mod-nat kmod-ipt-nat6 \
+    simple-adblock
+opkg --force-overwrite install coreutils-sort
+
+# Enable and start service.
+uci set simple-adblock.config.enabled=1
+uci commit simple-adblock
+/etc/init.d/simple-adblock start
+```
+
 TODO:
 - DDNS
 - VLAN
