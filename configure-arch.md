@@ -118,10 +118,12 @@ IP=dhcp
 EOF
 ```
 
-<!--
-Enable fingerprint reader (requires `extra/gobject-introspection` and `libfprint-vfs0090-git`).
+[Enable fingerprint reader](https://wiki.archlinux.org/index.php/Fprint#Configuration) for [ThinkPad X1 Carbon (Gen 4)](https://wiki.archlinux.org/index.php/Lenovo_ThinkPad_X1_Carbon_(Gen_4)#Fingerprint_Reader) (requires `aur/libfprint-vfs0090-git`).
 ```
-for /etc/pam.d/system-local-login and /etc/pam.d/sudo:  # Use fingerprint first.
-    auth      sufficient pam_fprintd.so  # at top
+for FILE in /etc/pam.d/system-local-login /etc/pam.d/sudo; do
+    TEMP=$(mktemp)
+    sed -E 's/^(#%PAM-1.0)$/\1\nauth sufficient pam_fprintd.so/' "$FILE" | column -t | uniq > "$TEMP"
+    sudo mv "$TEMP" "$FILE"
+done
+fprintd-enroll  # Record fingerprint.
 ```
--->
