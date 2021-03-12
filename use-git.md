@@ -20,6 +20,11 @@ $ git update-index --assume-unchanged <FILE>
 $ git update-index --no-assume-unchanged <FILE>
 ```
 
+Update both the working copy of a file _and_ its state in the index with that from HEAD ([source](https://stackoverflow.com/a/7147320)).
+```
+$ git checkout HEAD -- <FILE>
+```
+
 ## Avoiding painful merge conflicts during pulls
 
 Sometimes, pulling changes from a remote repository into the current branch can lead to a merge conflict:
