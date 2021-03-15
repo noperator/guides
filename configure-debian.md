@@ -23,10 +23,11 @@ apt install -y sudo
 usermod -aG sudo <USER>
 
 sudo apt install -y \
-    git vim-gtk3 curl unzip wget jq dnsutils exa lastpass-cli pinentry-tty \
+    git vim-gtk3 curl unzip wget jq dnsutils exa lastpass-cli pinentry-tty ripgrep \
     xorg i3 i3blocks rxvt-unicode \
     fonts-roboto fonts-symbola \
-    software-properties-common gpg
+    software-properties-common gpg \
+    bridge-utils
 ```
 
 Disable `pinentry` UI.
@@ -83,3 +84,44 @@ get -O - https://www.dropbox.com/download?plat=lnx.x86_64 | tar -xvzf -
 sudo wget -O /usr/local/bin/dropbox https://www.dropbox.com/download?dl=packages/dropbox.py &&
 sudo chmod +x /usr/local/bin/dropbox
 ```
+
+Fix video tearing.
+
+```
+# sudo mkdir /etc/X11/xorg.conf.d
+sudo tee /etc/X11/xorg.conf.d/20-intel.conf > /dev/null << EOF
+Section "Device"
+    Identifier "Intel Graphics"
+    Driver "intel"
+    Option "TearFree" "true"
+EndSection
+EOF
+```
+
+Configure and start Barrier server.
+
+```
+mkdir -p ~/.local/share/barrier/SSL/SSL/Fingerprints
+openssl req -x509 -nodes -days 365 -subj /CN=Barrier -newkey rsa:2048 -keyout ~/.local/share/barrier/SSL/Barrier.pem -out ~/.local/share/barrier/SSL/Barrier.pem
+openssl x509 -fingerprint -sha1 -noout -in ~/.local/share/barrier/SSL/Barrier.pem > ~/.local/share/barrier/SSL/SSL/Fingerprints/Local.txt
+
+barriers --enable-crypto
+```
+
+[Create network bridge](https://wiki.archlinux.org/index.php/Network_bridge#With_iproute2).
+
+```
+sudo ip link add name br0 type bridge
+sudo ip link set br0 up
+
+for IFACE in eno1 enp2s0; do
+    sudo ip link set "$IFACE" up
+    sudo ip addr flush dev "$IFACE"
+    sudo ip link set "$IFACE" master br0
+done
+
+sudo dhclient -v br0
+```
+
+TODO:
+- Configure firewall
