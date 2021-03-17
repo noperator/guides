@@ -27,7 +27,7 @@ sudo apt install -y \
     xorg i3 i3blocks rxvt-unicode \
     fonts-roboto fonts-symbola \
     software-properties-common gpg \
-    bridge-utils
+    bridge-utils pulseaudio
 ```
 
 Disable `pinentry` UI.
@@ -123,5 +123,18 @@ done
 sudo dhclient -v br0
 ```
 
+[Stream audio](https://wiki.archlinux.org/index.php/PulseAudio/Examples#PulseAudio_over_network) from Linux to macOS.
+
+```
+# Set up macOS server.
+brew install pulseaudio
+pulseaudio --load=module-native-protocol-tcp --exit-idle-time=-1 --daemon
+
+# Configure Linux client.
+# Copy ~/.config/pulse/cookie from macOS server to Linux client.
+sudo sed -i -E 's/.*(default-server =).*/\1 <SERVER-HOST>/' /etc/pulse/client.conf
+```
+
 TODO:
 - Configure firewall
+- Middle-click select on macOS
