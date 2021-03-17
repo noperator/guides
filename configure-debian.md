@@ -26,8 +26,11 @@ sudo apt install -y \
     git vim-gtk3 curl unzip wget jq dnsutils exa lastpass-cli pinentry-tty ripgrep \
     xorg i3 i3blocks rxvt-unicode \
     fonts-roboto fonts-symbola \
-    software-properties-common gpg \
+    software-properties-common gpg snapd \
     bridge-utils pulseaudio
+
+sudo snap install core
+sudo snap install --classic code
 ```
 
 Disable `pinentry` UI.
