@@ -27,7 +27,7 @@ Match User ssh_tunnel
   AllowTcpForwarding yes
   X11Forwarding no
   PermitTunnel no
-  GatewayPorts yes
+  GatewayPorts clientspecified
   AllowAgentForwarding no
   PasswordAuthentication yes
 EOF
