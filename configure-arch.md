@@ -12,7 +12,9 @@ passwd <USER>
 echo '<USER> ALL=(ALL) ALL' >> /etc/sudoers
 ```
 
-Install other utilities/drivers. Note: including `xf86-video-intel` due to an elusive X error, `AddScreen/ScreenInit failed for driver 0` and `drmSetMaster failed: Permission denied`.
+Install other utilities/drivers.
+Edit: Including `xf86-video-intel` due to an elusive X error, `AddScreen/ScreenInit failed for driver 0` and `drmSetMaster failed: Permission denied`.
+Edit: Removing `xf86-video-intel` supposing that it might've been causing lag while typing in URxvt.
 ```
 sudo pacman -S \
 i3 xorg-xinit xorg-server xf86-video-intel rxvt-unicode dmenu feh \
