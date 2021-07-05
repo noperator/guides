@@ -90,6 +90,13 @@ Connecting to host <ROUTER> port 5201
 [  5]   0.00-10.00  sec   406 MBytes   340 Mbits/sec                  receiver
 ```
 
+Update Adblock.
+
+```
+opkg update
+opkg list-upgradable
+```
+
 TODO:
 - DDNS
 - VLAN
