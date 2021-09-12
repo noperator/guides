@@ -64,6 +64,13 @@ Set password.
 echo "pi:$(base64 /dev/urandom | tr -d '/+=' | head -c 32)" | tee /dev/tty | sudo chpasswd
 ```
 
+Disable SSH password authentication.
+
+```
+sudo sed -i -E 's/^[# ]*(PasswordAuthentication) (yes|no)$/\1 no/' /etc/ssh/sshd_config
+sudo service sshd restart
+```
+
 Update.
 
 ```
