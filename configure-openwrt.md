@@ -1,15 +1,18 @@
 Set root password.
 
+```
+PASSWORD=$(cat /dev/urandom | sed -E 's/[^0-9a-zA-Z]//g' | head -c 32 | tr -d '\n'; echo)
+echo "$PASSWORD"
+for N in $(seq 1 2); do echo "$PASSWORD"; done | passwd
+PASSWORD=''
+```
+
+Generate SSH key, transfer, confirm, and lock down SSH.
 
 ```
-for i in $(seq 1 2); do echo '<PASSWORD>'; done | passwd
-```
-
-Lock down SSH.
-
-```
-ssh root@192.168.1.1 'tee -a /etc/dropbear/authorized_keys' < ~/.ssh/id_rsa.pub
-ssh -i ~/.ssh/id_rsa root@192.168.1.1 'uname -a'
+ssh-keygen -t rsa -b 4096 -o -a 100 -q -N '' -f ~/.ssh/id_rsa
+ssh root@<OPENWRT> 'tee -a /etc/dropbear/authorized_keys' < ~/.ssh/id_rsa.pub
+ssh -i ~/.ssh/id_rsa root@<OPENWRT> 'uname -a'
 uci set dropbear.@dropbear[0].PasswordAuth='off'
 uci set dropbear.@dropbear[0].RootPasswordAuth='off'
 uci commit
@@ -25,6 +28,26 @@ uci set wireless.@wifi-iface[0].encryption='psk2'
 uci set wireless.@wifi-iface[0].key='<KEY>'
 uci commit
 /etc/init.d/network reload
+```
+
+Set static IP address.
+
+```
+uci set network.lan.ipaddr='<IP>'
+uci set network.lan.gateway='<GATEWAY>'
+uci set network.lan.dns='<DNS>'
+uci commit
+/etc/init.d/network reload
+```
+
+If needed (e.g., WAP), disable DNS/DHCP and web server.
+
+```
+for SVC in dnsmasq uhttpd; do
+    for CMD in disable stop; do
+        /etc/init.d/$SVC $CMD
+    done
+done
 ```
 
 Set hostname.
