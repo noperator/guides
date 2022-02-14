@@ -106,3 +106,9 @@ Fix `startx` error, "Only console users are allowed to run the X server."
 ```
 sudo sed -i -E 's/(allowed_users=)console/\1anybody/' /etc/X11/Xwrapper.config
 ```
+
+[Rotate display](https://www.raspberrypi-spy.co.uk/2017/11/how-to-rotate-the-raspberry-pi-display-output/).
+
+```
+echo 'display_rotate=1' | sudo tee -a /boot/config.txt
+```

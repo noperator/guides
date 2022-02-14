@@ -32,7 +32,6 @@ sudo apt install -y \
     bridge-utils pulseaudio sshfs
 
 sudo snap install core
-sudo snap install typora
 sudo snap install --classic code
 ```
 
@@ -118,8 +117,8 @@ rtl_test -s 2400000
 
 ```
 # Install dependencies.
-sudo apt-get update
-sudo apt-get install \
+sudo apt update
+sudo apt install \
     apt-transport-https \
     ca-certificates \
     curl \
@@ -137,8 +136,14 @@ echo \
     sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
 
 # Install Docker Engine.
-sudo apt-get update
-sudo apt-get install docker-ce docker-ce-cli containerd.io
+sudo apt update
+sudo apt install docker-ce docker-ce-cli containerd.io
+
+# Verify installation.
+sudo docker run hello-world
+
+# If needed, re-enable IP bridge forwarding after Docker disables it.
+sudo ufw route allow in on br0 out on br0
 ```
 
 Install VirtualBox.
@@ -153,6 +158,19 @@ sudo apt-key add oracle_vbox_2016.asc
 
 sudo apt update
 sudo apt install -y virtualbox-6.1
+```
+
+[Install Typora](https://typora.io/#linux).
+
+```
+# Add Typora key and repo.
+wget -qO - 'https://typora.io/linux/public-key.asc' |
+    sudo apt-key add - &&
+sudo add-apt-repository 'deb https://typora.io/linux ./' &&
+sudo apt update
+
+# Install Typora.
+sudo apt install typora
 ```
 
 Fix [instantaneous wakeups from suspend](https://wiki.archlinux.org/index.php/Power_management/Suspend_and_hibernate#Instantaneous_wakeups_from_suspend) [triggered by USB devices](https://bbs.archlinux.org/viewtopic.php?pid=1575617#p1575617).
@@ -170,6 +188,27 @@ EOF
 i3-save-tree --workspace 10 > ~/.config/i3/workspace-av.json
 
 i3-msg "workspace 10; append_layout ~/.config/i3/workspace-av.json"
+```
+
+[Install _latest_ Node.js](https://github.com/nodesource/distributions#installation-instructions).
+
+```
+# Check existing version.
+for BIN in node npm; do echo -n "$BIN:"; "$BIN" -v; done
+node:v10.24.0
+npm:7.4.0
+
+# Add Node.js PPA. Already had the dependencies, so didn't run this.
+# sudo apt install curl software-properties-common
+curl -fsSL 'https://deb.nodesource.com/setup_17.x' | sudo bash -
+
+# Install Node.js.
+sudo apt install -y nodejs
+
+# Check new version.
+for BIN in node npm; do echo -n "$BIN:"; "$BIN" -v; done
+node:v16.4.1
+npm:7.18.1
 ```
 
 ## Networking
@@ -252,7 +291,7 @@ sshfs -o idmap=user <USER>@<HOST>:<REMOTE-FOLDER> <LOCAL-MOUNT>
 Open firewall port.
 
 ```
-sudo ufw 
+sudo ufw
 sudo ufw allow 12345/tcp proto tcp from any to any port 80,443 comment 'my cool web app ports'
 
 sudo ufw status numbered
@@ -277,6 +316,15 @@ Change hostname.
 ```
 sudo hostnamectl set-hostname <HOSTNAME>
 sudoedit /etc/hosts  # Add new hostname, remove old one.
+```
+
+Add a printer.
+
+```
+sudo lpadmin -E \
+    -p '<NAME>' \
+    -v "ipp://<HOSTNAME>:631/ipp/print" \
+    -m "driverless:ipp://<HOSTNAME>:631/ipp/print"
 ```
 
 ## Audio and video
@@ -323,7 +371,7 @@ obs-studio --startvirtualcam &
 
 ```
 lsusb | grep 'Logitech'
-Bus 001 Device 010: ID 046d:08e5 Logitech, Inc. 
+Bus 001 Device 010: ID 046d:08e5 Logitech, Inc.
 
 sudo tee /etc/udev/rules.d/90-blacklist-webcam-sound.rules > /dev/null << EOF
 # Disable webcam audio.
@@ -396,6 +444,22 @@ EOF
 sudo apt install -u bluetooth bluez blueman
 
 sudo sed -i -E 's/.*(ControllerMode =).*/\1 bredr/' /etc/bluetooth/main.conf
-sudo systemctl restart bluetooth 
-blueman-manager 
+sudo systemctl restart bluetooth
+blueman-manager
+```
+
+Rename audio devices.
+- https://forums.linuxmint.com/viewtopic.php?t=324124
+
+```
+pacmd list-sinks | grep -E 'name:|device\.description ='
+	name: <alsa_output.pci-0000_01_00.1.hdmi-stereo-extra3>
+		device.description = "Ellesmere HDMI Audio [Radeon RX 470/480 / 570/580/590] Digital Stereo (HDMI 4)"
+	name: <alsa_output.usb-Blue_Microphones_Yeti_Nano_2105SG00E768_888-000444040606-00.analog-stereo>
+		device.description = "Yeti Nano Analog Stereo"
+	name: <alsa_output.pci-0000_00_1f.3.analog-stereo>
+		device.description = "Built-in Audio Analog Stereo"
+
+pacmd 'update-sink-proplist alsa_output.pci-0000_01_00.1.hdmi-stereo-extra3 device.description="HDMI Monitor"'
+pacmd 'update-sink-proplist alsa_output.pci-0000_00_1f.3.analog-stereo device.description="Analog Headphones"'
 ```
