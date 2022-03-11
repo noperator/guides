@@ -463,3 +463,33 @@ pacmd list-sinks | grep -E 'name:|device\.description ='
 pacmd 'update-sink-proplist alsa_output.pci-0000_01_00.1.hdmi-stereo-extra3 device.description="HDMI Monitor"'
 pacmd 'update-sink-proplist alsa_output.pci-0000_00_1f.3.analog-stereo device.description="Analog Headphones"'
 ```
+
+Fix backlight on laptop.
+- https://askubuntu.com/a/1060843
+
+```
+sudo tee /etc/X11/xorg.conf.d/20-intel.conf > /dev/null << EOF
+Section "Device"
+    Identifier  "Intel Graphics"
+    Driver      "intel"
+    Option      "Backlight"  "intel_backlight"
+EndSection
+EOF
+```
+
+Install Neovim and vim-plug.
+- https://github.com/neovim/neovim/releases/latest
+- https://github.com/junegunn/vim-plug#neovim
+- Start Neovim and run `:PlugInstall`.
+- Restart Neovim.
+
+Install Go.
+- https://go.dev/doc/install
+
+```
+sudo rm -rf /usr/local/go &&
+    sudo tar -C /usr/local -xzf go1.17.8.linux-amd64.tar.gz
+
+go version
+go version go1.17.8 linux/amd64
+```
