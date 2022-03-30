@@ -321,10 +321,17 @@ sudoedit /etc/hosts  # Add new hostname, remove old one.
 Add a printer.
 
 ```
+sudo apt install -y cups avahi-daemon avahi-utils
+sudo systemctl enable --now cups.service avahi-daemon.service
+avahi-browse -alr  # Get printer hostname.
+sudo lpinfo -v     # Get printer device details.
 sudo lpadmin -E \
     -p '<NAME>' \
-    -v "ipp://<HOSTNAME>:631/ipp/print" \
-    -m "driverless:ipp://<HOSTNAME>:631/ipp/print"
+    -v 'ipp://<HOSTNAME>:631/ipp/print' \
+    -m 'driverless:ipp://<HOSTNAME>:631/ipp/print'
+lpstat -s -e  # Print(er) status summary.
+sudo cupsenable <NAME>
+sudo cupsaccept <NAME>
 ```
 
 ## Audio and video
