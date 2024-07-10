@@ -1,3 +1,11 @@
+Might need to manually set IP address.
+
+```
+sudo ifconfig en7 inet 192.168.1.2 netmask 255.255.255.0
+sudo route add default 192.168.1.1
+ssh root@192.168.1.1  # no password after `firstboot`
+```
+
 Set root password.
 
 ```
@@ -36,6 +44,14 @@ Set static IP address.
 uci set network.lan.ipaddr='<IP>'
 uci set network.lan.gateway='<GATEWAY>'
 uci set network.lan.dns='<DNS>'
+uci commit
+/etc/init.d/network reload
+```
+
+…or DHCP (e.g., WAP), if you want DNS/hostnames to work.
+
+```
+uci set network.lan.proto='dhcp'
 uci commit
 /etc/init.d/network reload
 ```
@@ -120,6 +136,63 @@ opkg update
 opkg list-upgradable
 ```
 
+Failover with dual ISPs.
+
+```
+opkg update
+opkg install mwan3
+opkg install iptables-nft
+opkg install ip6tables-nft
+
+# helpful commands
+swconfig dev switch0 show | grep -E 'Port|link' | grep -B 1 link:up | grep -v '\--'
+/etc/init.d/network reload && ifdown wan && ifup wan && sleep 5 && ifconfig eth0.1 && logread | grep -i wan | grep -v mwan | tail
+ifconfig -a | grep -E '^[^ ]|inet6? ' | grep -vE ': *(fe80|::|127\.|fd)'
+for IFACE in eth0.2 eth0.3; do
+    echo "iface: $IFACE"
+    ping -c 1 -W 2 -I $IFACE 9.9.9.9
+    ping6 -c 1 -W 2 -I $IFACE 2620:fe::9
+done 2>&1 | grep -E 'iface: |bytes from|unreachable'
+mwan3 use wan   ping  -c1 -W3 9.9.9.9    | grep 'bytes from'
+mwan3 use wan6  ping6 -c1 -W3 2620:fe::9 | grep 'bytes from'
+mwan3 use wanb  ping  -c1 -W3 9.9.9.9    | grep 'bytes from'
+mwan3 use wanb6 ping6 -c1 -W3 2620:fe::9 | grep 'bytes from'
+
+cd /etc/config
+{
+    echo "== /etc/config/network =="
+    cat network
+    echo "== /etc/config/mwan3 =="
+    cat mwan3
+    echo "== /etc/config/firewall =="
+    cat firewall
+    echo "== iptables-save =="
+    iptables-save
+    echo "== ip6tables-save =="
+    ip6tables-save
+    echo "== ifconfig -a =="
+    ifconfig -a | grep -E '^[^ ]|inet6? '
+    echo "== mwan3 status =="
+    mwan3 status 2>&1 | grep -vE 'Warning: ip6?tables'
+    echo "== ip route =="
+    ip route
+    echo "== ip -6 route =="
+    ip -6 route
+} | tee /tmp/cfg.txt
+```
+
+[Tailscale](https://openwrt.org/docs/guide-user/services/vpn/tailscale/start).
+
+```
+opkg update
+opkg install tailscale
+tailscale up
+tailscale status
+```
+
 TODO:
-- DDNS
-- VLAN
+- [ ] DDNS
+- [ ] VLAN
+- [ ] for vlan/mwan3 stuff:
+  - try specifying eth0, eth1?
+  - try using luci/web ui to generate text config?
