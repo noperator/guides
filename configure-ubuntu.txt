@@ -1,0 +1,103 @@
+from ubuntu-24.04-live-server-amd64.iso
+
+general {{{
+
+sudo apt install -y \
+    xorg i3 i3blocks \
+    tigervnc-standalone-server tigervnc-common \
+    alacritty \
+    fonts-roboto fonts-symbola fonts-font-awesome \
+    ripgrep unzip
+
+}}}
+
+vnc {{{
+
+ssh \
+    -fNL 15901:127.0.0.1:5901 \
+    -i <KEY> \
+    <USER>@<HOST>
+
+only realvnc client on macos will send system keys and bypass mission control shortcuts
+
+}}}
+
+https://www.dropbox.com/install-linux
+
+dropbox {{{
+
+wget -O - "https://www.dropbox.com/download?plat=lnx.x86_64" | tar xzf -
+~/.dropbox-dist/dropboxd
+
+mkdir ~/.local/bin
+cp -r .dropbox-dist/* ~/.local/bin/
+
+sudo wget -4 -O /usr/local/bin/dropbox https://www.dropbox.com/download?dl=packages/dropbox.py &&
+    sudo chmod +x /usr/local/bin/dropbox
+
+}}}
+
+dns {{{
+
+sudo resolvectl dns eno1 8.8.8.8 8.8.4.4
+
+might need to force -4 on wget, curl, etc.
+
+}}}
+
+chrome {{{
+
+wget -4 -q -O - https://dl.google.com/linux/linux_signing_key.pub | sudo tee /etc/apt/trusted.gpg.d/google.asc >/dev/null
+sudo sh -c 'echo "deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main" >> /etc/apt/sources.list.d/google.list'
+apt install -y google-chrome-stable
+
+}}}
+
+vmware {{{
+
+wget -4 -O VMware-Workstation-Full-17.5.1-23298084.x86_64.bundle 'https://downloads2.broadcom.com/?file=VMware-Workstation-Full-17.5.1-23298084.x86_64.bundle&oid=29065874&id=nYdnDKPnDAqNrtzLgJqZ5rLGv2sddOGwjQjS7uJvSaj6pqqQsyFn0xF-TUdR0grA&verify=1718806583-ud8oNTsxmODGsp3VmxMinZtoNk366CF5XJeVD2tAqts%3D'
+
+wget -4 -O VMware-Workstation-Full-17.5.2-23775571.x86_64.bundle 'https://downloads2.broadcom.com/?file=VMware-Workstation-Full-17.5.2-23775571.x86_64.bundle&oid=29066062&id=zQsGgsrJVeBWgNOSuWUkphQvjoukWtw7xfIf1k5pkcFAMOM61qZilQ9DDwb1LMJe&verify=1718807084-XRQZru%2BG9DHyItocPamkksa%2BPzaLx2xR8Vk2ui2Ne%2Fo%3D'
+
+# https://bbs.archlinux.org/viewtopic.php?pid=2096998#p2096998
+
+/usr/lib/policykit-1-gnome/polkit-gnome-authentication-agent-1
+
+# https://github.com/mkubecek/vmware-host-modules/blob/workstation-17.5.1/INSTALL
+
+wget -4 https://github.com/mkubecek/vmware-host-modules/archive/workstation-17.5.1.tar.gz
+tar -xzf workstation-17.5.1.tar.gz
+cd vmware-host-modules-workstation-17.5.1
+make
+sudo make install
+
+# https://askubuntu.com/a/1145426
+
+sudo vmware-modconfig --console --install-all
+openssl req -new -x509 -newkey rsa:2048 -keyout VMWARE17.priv -outform DER -out VMWARE17.der -nodes -days 36500 -subj "/CN=VMWARE/"
+sudo /usr/src/linux-headers-$(uname -r)/scripts/sign-file sha256 ./VMWARE17.priv ./VMWARE17.der $(modinfo -n vmmon)
+sudo /usr/src/linux-headers-$(uname -r)/scripts/sign-file sha256 ./VMWARE17.priv ./VMWARE17.der $(modinfo -n vmnet)
+strings $(modinfo -n vmmon) | grep 'Module signature appended'
+strings $(modinfo -n vmnet) | grep 'Module signature appended'
+sudo modprobe vmmon
+sudo modprobe vmnet
+
+# guess I didn't need these? did I even need to sign them at all? idk
+# sudo mokutil --import VMWARE17.der
+# mokutil --test-key VMWARE17.der
+
+Could not connect 'Ethernet0' to virtual network '/dev/vmnet0'. More information can be found in the vmware.log file.
+Failed to connect virtual device 'Ethernet0'.
+
+# https://www.reddit.com/r/archlinux/comments/9povuy/vmware_could_not_connect_ethernet0_to_virtual/
+
+sudo vmware-networks --start
+Started Bridge networking on vmnet0
+Enabled hostonly virtual adapter on vmnet1
+Started DHCP service on vmnet1
+Started NAT service on vmnet8
+Enabled hostonly virtual adapter on vmnet8
+Started DHCP service on vmnet8
+Started all configured services on all networks
+
+}}}
