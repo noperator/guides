@@ -101,3 +101,127 @@ Started DHCP service on vmnet8
 Started all configured services on all networks
 
 }}}
+
+nvidia {{{
+
+apti nvidia-driver-565-server nvidia-cuda-toolkit
+
+nvidia-smi
+
+}}}
+
+ssh luks unlock {{{
+
+apts dropbear-initramfs
+
+# /etc/dropbear/initramfs/dropbear.conf
+DROPBEAR_OPTIONS="-p <RANDOM_PORT> -m -s -j -k -I 180"
+
+sudo cp ~/.ssh/authorized_keys /etc/dropbear/initramfs/
+
+dpkg -l | g dropbear.initramfs
+ii  dropbear-initramfs  2022.83-4  all  lightweight SSH2 server and client - initramfs integration
+
+sudo lsinitramfs /boot/initrd.img-$(uname -r) | g dropbear
+etc/dropbear
+etc/dropbear/dropbear.conf
+etc/dropbear/dropbear_ecdsa_host_key
+etc/dropbear/dropbear_ed25519_host_key
+etc/dropbear/dropbear_rsa_host_key
+scripts/init-bottom/dropbear
+scripts/init-premount/dropbear
+usr/sbin/dropbear
+
+sudo update-initramfs -u
+dropbear: WARNING: Invalid authorized_keys file, SSH login to initramfs won't work!
+
+ssh m 'cat /proc/net/arp' | tail -n +2 | awk '{print $1}' | parallel -j 50 'ncat -nvz {} <RANDOM_PORT>' |& grep -i connected
+Ncat: Connected to <INITRAMFS_IP>:<RANDOM_PORT>.
+
+ssh -p <RANDOM_PORT> -i <KEY> root@<INITRAMFS_IP>
+
+cryptroot-unlock
+cryptsetup: dm_crypt-0 set up successfully
+Shared connection to <INITRAMFS_IP> closed.
+
+}}}
+
+remote sudo with yubikey {{{
+
+# https://github.com/jbeverly/pam_ssh_agent_auth/issues/23#issuecomment-1987383618
+https://github.com/z4yx/pam_rssh
+
+git clone --recurse-submodule https://github.com/z4yx/pam_rssh.git
+cd pam_rssh
+
+apti pkg-config libssl-dev build-essential libpam0g-dev
+
+cargo build --release
+
+# find /lib/x86_64-linux-gnu/security /lib/security /usr/lib/security -name libpam_rssh.so
+
+sudo cp target/release/libpam_rssh.so /lib/x86_64-linux-gnu/security/
+
+# /etc/pam.d/sudo
+auth sufficient libpam_rssh.so debug
+
+# /etc/sudoers
+Defaults:%sudo env_keep += "SSH_AUTH_SOCK"
+
+}}}
+
+tmp dir {{{
+
+apti libpam-tmpdir
+
+}}}
+
+luks/fmt for second drive {{{
+
+𝄢 lsblk
+NAME                        MAJ:MIN RM   SIZE RO TYPE  MOUNTPOINTS
+nvme0n1                     259:4    0   1.8T  0 disk
+
+sudo parted /dev/nvme0n1 mklabel gpt
+
+sudo parted /dev/nvme0n1 mkpart primary 0% 100%
+
+𝄢 lsblk /dev/nvme0n1
+NAME        MAJ:MIN RM  SIZE RO TYPE MOUNTPOINTS
+nvme0n1     259:4    0  1.8T  0 disk
+└─nvme0n1p1 259:6    0  1.8T  0 part
+
+sudo cryptsetup luksFormat /dev/nvme0n1p1
+sudo cryptsetup luksUUID /dev/nvme0n1p1
+<UUID>
+
+sudoedit /etc/crypttab
+dm_crypt-1 UUID=<UUID> none luks
+
+sudo cryptsetup open /dev/nvme0n1p1 dm_crypt-1
+
+𝄢 lsblk
+NAME                        MAJ:MIN RM   SIZE RO TYPE  MOUNTPOINTS
+nvme0n1                     259:4    0   1.8T  0 disk
+└─nvme0n1p1                 259:6    0   1.8T  0 part
+  └─dm_crypt-1              252:2    0   1.8T  0 crypt
+
+sudo mkfs.ext4 /dev/mapper/dm_crypt-1
+
+blkid /dev/mapper/dm_crypt-1
+/dev/mapper/dm_crypt-1: UUID="<UUID>" BLOCK_SIZE="4096" TYPE="ext4"
+
+sudoedit /etc/fstab
+/dev/disk/by-uuid/<UUID> /data ext4 defaults 0 2
+
+sudo mkdir /data
+sudo mount /data
+
+sudo chown <USER> /data
+sudo chmod 755 /data
+
+mkdir /data/lang-models
+sudo chown <USER>:ollama /data/lang-models
+sudo chmod 770 /data/lang-models
+
+}}}
