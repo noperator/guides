@@ -332,6 +332,9 @@ sudo lpadmin -E \
 lpstat -s -e  # Print(er) status summary.
 sudo cupsenable <NAME>
 sudo cupsaccept <NAME>
+
+sudo apt remove cups
+sudo apt autoremove
 ```
 
 ## Audio and video
