@@ -1,5 +1,6 @@
 Might need to manually set IP address.
 
+
 ```
 sudo ifconfig en7 inet 192.168.1.2 netmask 255.255.255.0
 sudo route add default 192.168.1.1
@@ -179,6 +180,19 @@ cd /etc/config
     echo "== ip -6 route =="
     ip -6 route
 } | tee /tmp/cfg.txt
+
+# list these policies
+uci show mwan3 | grep 'policy$' | sed -E 's/^mwan3\.//; s/=policy//'
+wan_only
+wanb_only
+balanced
+wan_wanb
+wanb_wan
+
+# set these policies (and validate taht the incoming policy is in the list above)
+uci show mwan3 | grep use_policy
+mwan3.https.use_policy='wan_wanb'
+mwan3.default_rule_v4.use_policy='wanb_wan'
 ```
 
 [Tailscale](https://openwrt.org/docs/guide-user/services/vpn/tailscale/start).
@@ -189,6 +203,40 @@ opkg install tailscale
 tailscale up
 tailscale status
 ```
+
+adblock-fast
+https://docs.openwrt.melmac.net/adblock-fast/#how-to-install
+https://docs.openwrt.melmac.net/#on-your-router
+
+```
+opkg update
+opkg install wget-ssl
+echo -e -n 'untrusted comment: OpenWrt usign key of Stan Grishin\nRWR//HUXxMwMVnx7fESOKO7x8XoW4/dRidJPjt91hAAU2L59mYvHy0Fa\n' > /etc/opkg/keys/7ffc7517c4cc0c56
+sed -i '/stangri_repo/d' /etc/opkg/customfeeds.conf
+echo 'src/gz stangri_repo https://repo.openwrt.melmac.net' >> /etc/opkg/customfeeds.conf
+opkg update
+
+opkg find adblock-fast
+adblock-fast - 1.1.2-2 - Fast AdBlocking script to block ad or abuse/malware domains with Dnsmasq, SmartDNS or Unbound.
+ Script supports local/remote list of domains and hosts-files for both block-listing and allow-listing.
+ Please see https://docs.openwrt.melmac.net/adblock-fast/ for more information.
+
+opkg install adblock-fast
+
+uci set adblock-fast.config.enabled='1'; uci commit adblock-fast;
+/etc/init.d/adblock-fast enable
+/etc/init.d/adblock-fast restart
+
+/etc/init.d/adblock-fast allow awstrack.me
+/etc/init.d/adblock-fast allow analytics.google.com
+```
+
+openssh for yubikey
+
+```
+openssh-server - 9.8p1-1 - OpenSSH server.
+```
+
 
 TODO:
 - [ ] DDNS
