@@ -503,3 +503,15 @@ sudo rm -rf /usr/local/go &&
 go version
 go version go1.17.8 linux/amd64
 ```
+
+YubiKey for remote auth.
+
+```
+macos local stuff: make sure
+- ssh config has AddKeysToAgent
+- agent is running
+- agent env vars are sourced in shell
+
+remote:
+- install/config: https://github.com/z4yx/pam_rssh
+```
