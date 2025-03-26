@@ -296,3 +296,118 @@ cloud9 / c9
 */25 * * * * [[ $({ screen -ls | grep tached; /usr/sbin/ss -antp | grep ESTAB | grep -E ':22(\s|$)'; } | wc -l) -gt 0 ]] && sudo shutdown -c || { curl -sd "cloud9 shutting down" ntfy.sh/<ADDR>; sudo shutdown -h now; }
 0 12 * * * curl -sd "cloud9 uptime: $(uptime -p); screens: $(screen -ls | grep tached | awk '{print $1}' | tr '\n' ' ')" ntfy.sh/<ADDR>
 ```
+
+unstick gpg 
+
+```
+gpg: public key decryption failed: Inappropriate ioctl for device
+gpg: decryption failed: Inappropriate ioctl for device
+
+gpgconf --kill gpg-agent
+echo "UPDATESTARTUPTTY" | gpg-connect-agent
+export GPG_TTY=$(tty)
+```
+
+# tailscale subnet router
+- https://www.reddit.com/r/Tailscale/comments/1ai38sm/dns_for_internal_and_vpn_network/
+- https://tailscale.com/kb/1019/subnets
+- https://tailscale.com/kb/1054/dns#restricted-nameservers
+- enable ip forward on nuc (necessary? idk)
+  ```
+  echo 'net.ipv4.ip_forward = 1' | sudo tee -a /etc/sysctl.d/99-tailscale.conf
+  echo 'net.ipv6.conf.all.forwarding = 1' | sudo tee -a /etc/sysctl.d/99-tailscale.conf
+  sudo sysctl -p /etc/sysctl.d/99-tailscale.conf
+  ```
+- /etc/dnsmasq.conf on nuc to forward dns:
+  ```
+  server=/<DOMAIN>/192.X
+  listen-address=100.X
+  bind-interfaces
+  ```
+- tailscale up on nuc: `sudo tailscale up --advertise-routes=192.X/24`
+- add split dns with tailscale ip of nuc serving <DOMAIN>
+
+nfs macbook to linux srver
+
+```
+apti nfs-kernel-server
+
+# /etc/exports
+/home/<USER>/github/<USER>/<APP>/ <NETWORK>/24(rw,sync,no_subtree_check,all_squash,anonuid=1000,anongid=1000)
+
+# # /etc/default/nfs-kernel-server
+# RPCMOUNTDOPTS="--port <PORT1>"
+
+cat /etc/nfs.conf | g '^\[|^port=' | g -B 1 port= | vg '\--' | paste -d @ - -  | column -ts@
+[lockd]   port=<PORT2>
+[mountd]  port=<PORT3>
+[nfsd]    port=<PORT4>
+[statd]   port=<PORT5>
+
+sudo exportfs -a
+sudo systemctl restart nfs-kernel-server
+
+# macbook
+mkdir -p ~/tmp/<HOST>-<APP>
+sudo mount -t nfs -o resvport,rw,port=<PORT4> <HOST>.<DOMAIN>:/home/<USER>/github/<USER>/<APP>/ ~/tmp/<APP>
+
+sudo groupadd sharers
+sudo usermod -aG sharers <USER>
+sudo useradd -m samba_user
+sudo smbpasswd -a samba_user
+sudo smbpasswd -e samba_user
+sudo usermod -aG sharers samba_user
+sudo chgrp -R sharers <APP>
+sudo chmod g+s <APP>
+sudo chmod -R g+rw <APP>
+sudo chgrp sharers /home/<USER>
+
+# /etc/samba/smb.conf
+[global]
+min protocol = SMB3
+security = user
+server role = standalone server
+[repo]
+path = /path/to/repo
+valid users = samba_user
+read only = no
+force group = sharers
+
+okay here's what seems to work:
+
+## linux server
+
+# /etc/exports
+/home/<USER>/github/<USER>/<APP>/ <NETWORK>/24(rw,async,no_subtree_check,all_squash,anonuid=1000,anongid=1000)
+- async: git status runs in .2s vs .6s
+- all_squash,anonuid=1000,anongid=1000: allows write from macos
+
+## macos client
+
+sudo mount -t nfs -o resvport,rw,port=<PORT4>,noowners,nolock <HOST>.<DOMAIN>:/home/<USER>/github/<USER>/<APP>/ ~/tmp/<APP>
+# - resvport: fails otherwise
+# - noowners: makes it show up with macos uid/gid
+# - nolock: lockd (?) wasn't working before and not needed
+
+questions:
+- encryption/tls?
+- authentication?
+- maybe <APP> is just a huge repo and that's why it takes so long to git status…
+```
+
+switchresx
+
+```
+# about
+install helper tool
+# general
+launch automatically
+# woieyeks
+## custom resolutions
+simplified
+3440 x 1440, 59.94 Hz
+cmd + s to save
+## current resolutions
+select the new one
+save on quit
+```
