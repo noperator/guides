@@ -43,6 +43,12 @@ docker run -d \
   ghcr.io/home-assistant/home-assistant:stable
 
 ssh -fNL 8123:127.0.0.1:8123 <NUC>
+
+# configuration.yaml
+http:
+  use_x_forwarded_for: true
+  trusted_proxies:
+    - 127.0.0.1
 ```
 
 https://www.reddit.com/r/yubikey/comments/u7ecpl/yubikey_remote_sudo_authentication/
@@ -71,3 +77,76 @@ ssh -fNL 8080:127.0.0.1:8080 <NUC>
 
 letsencrypt not working
 ```
+
+caddy
+
+```
+go install github.com/caddyserver/xcaddy/cmd/xcaddy@latest
+xcaddy build --with github.com/caddy-dns/cloudflare
+sudo mv caddy /usr/bin
+
+sudo groupadd --system caddy
+sudo useradd --system \
+    --gid caddy \
+    --create-home \
+    --home-dir /var/lib/caddy \
+    --shell /usr/sbin/nologin \
+    --comment "Caddy web server" \
+    caddy
+
+sudo mkdir /etc/caddy
+sudo chown -R root:caddy /etc/caddy
+sudo mkdir /var/www
+sudo chown caddy:caddy /var/www
+
+# sudoedit /etc/systemd/system/caddy.service
+{{{
+[Unit]
+Description=Caddy
+Documentation=https://caddyserver.com/docs/
+After=network.target network-online.target
+Requires=network-online.target
+
+[Service]
+Type=notify
+User=caddy
+Group=caddy
+ExecStart=/usr/bin/caddy run --environ --config /etc/caddy/Caddyfile
+ExecReload=/usr/bin/caddy reload --config /etc/caddy/Caddyfile
+TimeoutStopSec=5s
+LimitNOFILE=1048576
+LimitNPROC=512
+PrivateTmp=true
+ProtectSystem=full
+AmbientCapabilities=CAP_NET_BIND_SERVICE
+
+[Install]
+WantedBy=multi-user.target
+}}}
+
+sudo systemctl edit caddy
+{{{
+[Service]
+Environment="CF_API_TOKEN=your-token-here"
+}}}}
+sudo chmod 600 /etc/systemd/system/caddy.service.d/override.conf
+sudo chown root:root /etc/systemd/system/caddy.service.d/override.conf
+
+sudo chmod 644 /etc/systemd/system/caddy.service
+sudo systemctl daemon-reload
+sudo systemctl enable caddy
+sudo systemctl start caddy
+
+```
+
+steps for caddy:
+- add cname to openwrt /etc/config/dhcp + restart
+- add entry in /etc/caddy/Caddyfile
+- to troubleshoot, stop caddy, clear TXT from cloudflare, start caddy, check logs
+- helpful commands:
+  ```
+  sudoedit /etc/caddy/Caddyfile
+  sudo caddy fmt --overwrite -c /etc/caddy/Caddyfile
+  caddy reload -c /etc/caddy/Caddyfile
+  sudo journalctl -u caddy -f
+  ```
